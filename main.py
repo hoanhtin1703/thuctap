@@ -2,7 +2,7 @@ import pandas as pd
 from json import loads, dumps
 from typing import Union
 from fastapi import FastAPI,status,HTTPException
-
+import re
 # ??  Cấu trúc code 
 # TODO: Khởi tạo DataFrame 
 #  ** Tạo đường dẫn truy xuất file
@@ -33,6 +33,14 @@ def list_danh_muc_hoc_phan(df):
     df.drop_duplicates(subset='Học phần', keep='first', inplace=True)
     df.reset_index(drop=True, inplace=True)
     return df
+def list_lop_hoc_phan(df, keyword):
+    df = df[['Lớp học phần', 'Giảng viên 1', 'Giảng viên 2']]
+    df = df.loc[df['Lớp học phần'].str.contains(re.escape(keyword))]
+    df.fillna("Chưa được phân công", inplace=True)
+    return df
+
+
+# TODO : Khởi tạo Request từ Fast API 
 app = FastAPI()
 # ** Xây dựng các Request  ( GET,POST,PUT,DELETE)
 @app.get("/")
@@ -51,3 +59,16 @@ async def read_danh_muc_hoc_phan():
         }
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+@app.get("/lop-hoc-phan")
+def read_lop_hoc_phan(keyword: str):
+    try:
+        # Khai báo DataFrame của bạn thay cho data()
+        clean_data = list_lop_hoc_phan(data(), keyword)
+        return {
+            "data": clean_data.to_dict(orient="records"),
+            "total": len(clean_data),
+            "status": status.HTTP_200_OK
+        }
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+

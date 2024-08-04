@@ -7,6 +7,7 @@ danh_sach = danh_sach_sinh_vien.Danh_sach_sinh_vien
 dataframe = data.load_data()
 class Item(BaseModel):
     keyword: str
+    
 router = APIRouter()
 @router.get('/danh-muc-hoc-phan')
 async def get_danh_muc_hoc_phan():

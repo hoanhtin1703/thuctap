@@ -62,8 +62,10 @@ async def get_danh_muc_hoc_phan(file_key: str):
         if not file_path:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found.")
         
-        # Đọc dữ liệu từ file
-        clean_data = lop_hoc_phan.filter_danh_muc_hoc_phan(data.load_data(file_path))
+        # Đọc dữ liệu từ tất cả các sheet trong file
+        df_list = data.load_data(file_path)
+        clean_data = lop_hoc_phan.filter_danh_muc_hoc_phan(df_list)
+        
         unique_courses = clean_data['Lớp học phần'].str.replace(r'\(\d+\).*', '', regex=True).str.strip().drop_duplicates(keep='first').reset_index(drop=True)
         
         return {
@@ -74,5 +76,6 @@ async def get_danh_muc_hoc_phan(file_key: str):
         }
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
 
 

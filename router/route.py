@@ -4,6 +4,7 @@ from controller import lop_hoc_phan, trich_xuat_ten_files
 from dataframe import data
 from pathlib import Path
 from display import renamed_files
+from controller.lop_hoc_phan import Hoc_Phan,DanhSachSinhVien
 
 router =  APIRouter()
 
@@ -64,8 +65,8 @@ async def get_danh_muc_hoc_phan(file_key: str):
         
         # Đọc dữ liệu từ tất cả các sheet trong file
         df_list = data.load_data(file_path)
-        clean_data = lop_hoc_phan.filter_danh_muc_hoc_phan(df_list)
-        
+        hoc_phan = Hoc_Phan()
+        clean_data = hoc_phan.filter_danh_muc_hoc_phan(df_list)
         unique_courses = clean_data['Lớp học phần'].str.replace(r'\(\d+\).*', '', regex=True).str.strip().drop_duplicates(keep='first').reset_index(drop=True)
         
         return {
@@ -73,6 +74,31 @@ async def get_danh_muc_hoc_phan(file_key: str):
             "hoc_phan": unique_courses.to_list(),
             "total": len(clean_data),
             "status": status.HTTP_200_OK
+        }
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+@router.get('/danh-sach-sinh-vien/')
+async def get_danh_sach_sinh_vien(khoa: str,hoc_phan:str,lop_hoc_phan):
+    try:
+        file_path = renamed_files.get_file_path(khoa)
+        if not file_path:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found.")
+        df_list =  data.load_data(file_path)
+        # Khởi tạo Danh sách sinh viên
+        ds = DanhSachSinhVien(df_list)
+        clean_data = ds.filter_hoc_phan_con(hoc_phan,lop_hoc_phan)
+
+        hocphan =  clean_data['Lớp học phần'].unique().tolist()
+
+        total = {"Tổng số sinh viên": clean_data['Tổng số sinh viên'].iloc[0], 
+                "Tổng số theo khóa" :clean_data['Tổng số sinh viên'].iloc[1]}
+        filter_data = clean_data.iloc[:, 1:10]
+        return {
+            "data" :filter_data.to_dict(orient="records"),
+            "total" :total,
+            "status": status.HTTP_200_OK,
+            "hocphan": hocphan
+        #
         }
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

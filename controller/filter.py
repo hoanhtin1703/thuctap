@@ -5,7 +5,6 @@ from controller import url_friendly
 class Hoc_Phan:
     def __init__(self, df_list):
         self.df_list = df_list
-
     def filter_danh_muc_hoc_phan(self):
         """Filter and combine data from all DataFrames."""
         combined_df = pd.DataFrame()

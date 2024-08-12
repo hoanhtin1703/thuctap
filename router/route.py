@@ -1,10 +1,10 @@
 from typing import Union
 from fastapi import APIRouter, status, HTTPException, File, UploadFile
-from controller import lop_hoc_phan, trich_xuat_ten_files
+from controller import filter, trich_xuat_ten_files
 from dataframe import data
 from pathlib import Path
 from display import renamed_files
-from controller.lop_hoc_phan import Hoc_Phan,DanhSachSinhVien
+from controller.filter import Hoc_Phan,DanhSachSinhVien
 
 router =  APIRouter()
 
@@ -55,7 +55,7 @@ async def import_danh_muc_hoc_phan(file: UploadFile = File(...)):
 
     return {"filename": new_filename, "data": df.head().to_dict(orient='records')}
 
-@router.get('/danh-muc-hoc-phan-{file_key}')
+@router.get('/danh-muc-hoc-phan/{file_key}')
 async def get_danh_muc_hoc_phan(file_key: str):
     try:
         # Lấy đường dẫn file từ từ điển renamed_files

@@ -5,7 +5,7 @@ from dataframe import data
 from pathlib import Path
 from display import renamed_files
 from controller.filter import Hoc_Phan,DanhSachSinhVien
-
+import pandas as pd
 router =  APIRouter()
 
 # Import file excel
@@ -103,7 +103,6 @@ async def get_danh_sach_sinh_vien(file_key: str,lop_hoc_phan:str):
         # Khởi tạo Danh sách sinh viên
         ds = DanhSachSinhVien(df_list)
         clean_data = ds.filter_danh_sach_sinh_vien(lop_hoc_phan)
-
         # Lấy tên học phần
         hocphan =  clean_data['Lớp học phần'].unique().tolist()
 

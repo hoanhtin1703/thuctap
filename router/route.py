@@ -65,40 +65,58 @@ async def get_danh_muc_hoc_phan(file_key: str):
         
         # Đọc dữ liệu từ tất cả các sheet trong file
         df_list = data.load_data(file_path)
-        hoc_phan = Hoc_Phan()
-        clean_data = hoc_phan.filter_danh_muc_hoc_phan(df_list)
-        unique_courses = clean_data['Lớp học phần'].str.replace(r'\(\d+\).*', '', regex=True).str.strip().drop_duplicates(keep='first').reset_index(drop=True)
-        
+        hoc_phan = Hoc_Phan(df_list)
+        clean_data = hoc_phan.filter_danh_muc_hoc_phan()
         return {
             "data": clean_data.to_dict(orient='records'),
-            "hoc_phan": unique_courses.to_list(),
             "total": len(clean_data),
             "status": status.HTTP_200_OK
         }
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-@router.get('/danh-sach-sinh-vien/')
-async def get_danh_sach_sinh_vien(khoa: str,hoc_phan:str,lop_hoc_phan):
+@router.get('/{file_key}/{hoc_phan}')
+async def get_danh_muc_hoc_phan(file_key: str,hoc_phan:str):
     try:
-        file_path = renamed_files.get_file_path(khoa)
+        # Lấy đường dẫn file từ từ điển renamed_files
+        file_path = renamed_files.get_file_path(file_key)
+        if not file_path:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found.")
+        
+        # Đọc dữ liệu từ tất cả các sheet trong file
+        df_list = data.load_data(file_path)
+        Hoc_phan = Hoc_Phan(df_list)
+        clean_data = Hoc_phan.filter_lop_hoc_phan(hoc_phan)
+        return {
+            "data": clean_data.to_dict(orient='records'),
+            "total": len(clean_data),
+            "status": status.HTTP_200_OK
+        }
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+@router.get('/{file_key}/{lop_hoc_phan}/danh-sach-sinh-vien')
+async def get_danh_sach_sinh_vien(file_key: str,lop_hoc_phan:str):
+    try:
+        file_path = renamed_files.get_file_path(file_key)
         if not file_path:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found.")
         df_list =  data.load_data(file_path)
         # Khởi tạo Danh sách sinh viên
         ds = DanhSachSinhVien(df_list)
-        clean_data = ds.filter_hoc_phan_con(hoc_phan,lop_hoc_phan)
+        clean_data = ds.filter_danh_sach_sinh_vien(lop_hoc_phan)
 
+        # Lấy tên học phần
         hocphan =  clean_data['Lớp học phần'].unique().tolist()
 
         total = {"Tổng số sinh viên": clean_data['Tổng số sinh viên'].iloc[0], 
                 "Tổng số theo khóa" :clean_data['Tổng số sinh viên'].iloc[1]}
-        filter_data = clean_data.iloc[:, 1:10]
+        
+        # Lấy danh sách sinh viên từ cột đầu tiên đến cột Khóa 
+        filter_data = clean_data.iloc[:, 1:11]
         return {
             "data" :filter_data.to_dict(orient="records"),
             "total" :total,
             "status": status.HTTP_200_OK,
             "hocphan": hocphan
-        #
         }
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

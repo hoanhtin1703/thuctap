@@ -19,7 +19,7 @@ class Hoc_Phan:
         # Xóa các bản ghi trùng lặp cuối cùng
         combined_df.drop_duplicates(subset=['Lớp học phần'], keep='first', inplace=True)
         combined_df.reset_index(drop=True, inplace=True)
-        combined_df['sku'] = combined_df['Lớp học phần'].apply(url_friendly.clean_hoc_phan_name)
+        combined_df['sku'] = combined_df['Lớp học phần'].apply(url_friendly.clean_name)
         return combined_df
     def filter_lop_hoc_phan(self,keyword):
         """Filter and combine data from all DataFrames."""
@@ -28,7 +28,8 @@ class Hoc_Phan:
             # Lọc và xử lý dữ liệu từ mỗi sheet
             if 'Lớp học phần' in df.columns and 'GVHD' in df.columns:
                 filtered_df = df[['Lớp học phần',"GVHD"]].copy()
-                filtered_df['sku'] = filtered_df['Lớp học phần'].apply(url_friendly.clean_hoc_phan_name)
+                filtered_df['sku'] = filtered_df['Lớp học phần'].apply(url_friendly.clean_name)
+                print(filtered_df['sku'])
                 filtered_df.drop_duplicates(subset=['Lớp học phần'], keep='first', inplace=True)
                 filtered_df = filtered_df.reset_index(drop=True)
                 combined_df = pd.concat([combined_df, filtered_df], ignore_index=True)
@@ -36,11 +37,13 @@ class Hoc_Phan:
         combined_df.drop_duplicates(subset=['Lớp học phần'], keep='first', inplace=True)
         combined_df.reset_index(drop=True, inplace=True)
         filtered_by_hoc_phan = combined_df[combined_df['sku'].str.contains(re.escape(keyword))]
+        print(filtered_by_hoc_phan)
         return filtered_by_hoc_phan
 class DanhSachSinhVien(Hoc_Phan):
     def filter_danh_sach_sinh_vien(self, keyword=None):
         combined_df = pd.DataFrame()
-        lop_hoc_phan_clean = url_friendly.clean_lop_hoc_phan_name(keyword)
+        lop_hoc_phan_clean = url_friendly.clean_name(keyword)
+        print(lop_hoc_phan_clean)
         for df in self.df_list:
             if 'Lớp học phần' in df.columns:
                 df['Họ và Tên'] = df['Họ và tên'] + ' ' + df['Unnamed: 3']
@@ -53,8 +56,13 @@ class DanhSachSinhVien(Hoc_Phan):
                 cols = df.columns.tolist()
                 cols.insert(col_index, 'Họ và Tên')
                 df = df[cols]
-                df['sku'] = df['Lớp học phần'].apply(url_friendly.clean_lop_hoc_phan_name)
-                filtered_df = df[df['sku'].str.contains(re.escape(lop_hoc_phan_clean))]
+                df['sku'] = df['Lớp học phần'].apply(url_friendly.clean_name)
+                filtered_df = df[df['sku'] == lop_hoc_phan_clean]
+                filtered_df.drop_duplicates(inplace=True)
+                filtered_df.reset_index(drop=True, inplace=True)
+                
+                print(filtered_df)
+                # filtered_df = df[df['sku'].str.contains(re.escape(lop_hoc_phan_clean))]
                 if not filtered_df.empty:  # Kiểm tra nếu DataFrame không rỗng
                     combined_df = pd.concat([combined_df, filtered_df])
         
@@ -62,7 +70,6 @@ class DanhSachSinhVien(Hoc_Phan):
         combined_df['Tổng số sinh viên'] = np.nan
         combined_df.drop_duplicates(inplace=True)
         combined_df.reset_index(drop=True, inplace=True)
-
         for lop_hoc_phan in combined_df['Lớp học phần'].unique():
             # Tính tổng số sinh viên cho từng lớp học phần
             idx = combined_df[combined_df['Lớp học phần'] == lop_hoc_phan].index[0]
@@ -75,5 +82,5 @@ class DanhSachSinhVien(Hoc_Phan):
             total_students_by_khoa.columns = ['Khóa', 'Tổng số sinh viên']
             total_students_khoa = '; '.join(total_students_by_khoa.apply(lambda x: f"{x['Khóa']} - {x['Tổng số sinh viên']}", axis=1))
             combined_df.at[idx + 1, 'Tổng số sinh viên'] = total_students_khoa
-
+        
         return combined_df

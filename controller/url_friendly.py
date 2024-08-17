@@ -4,8 +4,10 @@ import unidecode
 def clean_hoc_phan_name(lop_hoc_phan):
     # Tách phần chính của tên lớp học phần, loại bỏ các phần bổ sung
     # main_part = lop_hoc_phan.split('(')[0].strip()
+    main_part= re.sub(r"[()]", "", lop_hoc_phan)
+    # s = re.sub(r"[()]", "", s)
     # Chuyển đổi sang chữ thường, loại bỏ dấu tiếng Việt và thay thế dấu cách và dấu gạch ngang thừa
-    url_friendly_name = re.sub(r'[\s-]+', '-', unidecode.unidecode(lop_hoc_phan.lower()))
+    url_friendly_name = re.sub(r'[\s-]+', '-', unidecode.unidecode(main_part.lower()))
     return url_friendly_name
 
 def clean_lop_hoc_phan_name(name: str) -> str:

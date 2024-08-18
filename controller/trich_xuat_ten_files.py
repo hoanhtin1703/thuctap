@@ -10,7 +10,7 @@ def extract_info_from_filename(filename: str):
     # Trích xuất học kỳ
     hki_match = re.search(r'HKI', filename, re.IGNORECASE)
     hkii_match = re.search(r'HKII', filename, re.IGNORECASE)
-    semester = "hk1" if hki_match else "hk2" if hkii_match else None
+    semester = "hk2" if hki_match else "hk1" if hkii_match else None
     
     # Trích xuất năm học
     year_match = re.search(r'(\d{4})[-\s]*(\d{4})', filename)

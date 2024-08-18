@@ -1,5 +1,4 @@
-import re
-import unidecode
+
 
 # def clean_hoc_phan_name(lop_hoc_phan):
 #     # Tách phần chính của tên lớp học phần, loại bỏ các phần bổ sung

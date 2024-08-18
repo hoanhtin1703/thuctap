@@ -3,7 +3,7 @@ from fastapi import APIRouter, status, HTTPException, File, UploadFile
 from controller import filter, trich_xuat_ten_files
 from dataframe import data
 from pathlib import Path
-from display import renamed_files
+from display import renamed_files, data_store
 from controller.filter import Hoc_Phan,DanhSachSinhVien
 import pandas as pd
 router =  APIRouter()
@@ -40,20 +40,35 @@ async def import_danh_muc_hoc_phan(file: UploadFile = File(...)):
 
     # Thêm thông tin vào từ điển và lưu tệp JSON
     file_key = f"khoa-{khoa_number}-{semester}-{school_year}"
+    new_data = {
+        "Khoa": f"Khoá {khoa_number}",
+        "Hoc_ky": f"Học kỳ {semester[-1]}",
+        "Nam_hoc": f"{school_year.replace('-', ' - ')}",
+        "Url_hoc_phan": file_key
+    }
+    
+    data_store.add_imported_file(new_data)
+
     try:
         renamed_files.add_file(file_key, str(new_file_path))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error updating renamed files dictionary: {e}")
 
-    try:
-        df = data.load_data(new_file_path)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error loading data from file: {e}")
-
     print(f"File saved as: {new_filename}")
     print(f"Current renamed files dictionary: {renamed_files}")
 
-    return {"filename": new_filename, "data": df.head().to_dict(orient='records')}
+    # Load dữ liệu từ file Excel
+    try:
+        df_list = data.load_data(new_file_path)
+        if df_list:
+            all_data = [df.head().to_dict(orient='records') for df in df_list]
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No data found in the file.")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error loading data from file: {e}")
+
+    return {"filename": new_filename, "data": all_data}
+
 
 @router.get('/danh-muc-hoc-phan/{file_key}')
 async def get_danh_muc_hoc_phan(file_key: str):
@@ -123,3 +138,6 @@ async def get_danh_sach_sinh_vien(file_key: str,lop_hoc_phan:str):
 
 
 
+@router.get('/loc-ten-file')
+async def loc_ten_file():
+    return {"data": data_store.imported_files_data}

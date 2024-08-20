@@ -1,20 +1,20 @@
 [
     {
-        "Khoa": "Kho\u00e1 21",
-        "Hoc_ky": "H\u1ecdc k\u1ef3 2",
-        "Nam_hoc": "23 - 24",
-        "Url_hoc_phan": "khoa-21-hk2-23-24"
-    },
-    {
         "Khoa": "Kho\u00e1 20",
         "Hoc_ky": "H\u1ecdc k\u1ef3 2",
-        "Nam_hoc": "23 - 24",
-        "Url_hoc_phan": "khoa-20-hk2-23-24"
+        "Nam_hoc": "2023 - 2024",
+        "Url_hoc_phan": "khoa-20-hk2-2023-2024"
     },
     {
-        "Khoa": "Kho\u00e1 22",
+        "Khoa": "Kho\u00e1 21",
         "Hoc_ky": "H\u1ecdc k\u1ef3 2",
-        "Nam_hoc": "23 - 24",
-        "Url_hoc_phan": "khoa-22-hk2-23-24"
+        "Nam_hoc": "2023 - 2024",
+        "Url_hoc_phan": "khoa-21-hk2-2023-2024"
+    },
+    {
+        "Khoa": "Kho\u00e1 25",
+        "Hoc_ky": "H\u1ecdc k\u1ef3 2",
+        "Nam_hoc": "2023 - 2024",
+        "Url_hoc_phan": "khoa-25-hk2-2023-2024"
     }
 ]

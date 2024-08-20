@@ -101,9 +101,11 @@ async def get_danh_muc_hoc_phan(file_key: str,hoc_phan:str):
         df_list = data.load_data(file_path)
         Hoc_phan = Hoc_Phan(df_list)
         clean_data = Hoc_phan.filter_lop_hoc_phan(hoc_phan)
+        tenhocphan = clean_data['Lớp học phần'].replace(r'\(\d+\).*', '', regex=True).str.strip().drop_duplicates(keep="first")
         return {
             "data": clean_data.to_dict(orient='records'),
             "total": len(clean_data),
+            "hocphan":tenhocphan.to_list(),
             "status": status.HTTP_200_OK
         }
     except Exception as e:
@@ -135,9 +137,13 @@ async def get_danh_sach_sinh_vien(file_key: str,lop_hoc_phan:str):
         }
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-
-
 @router.get('/loc-ten-file')
 async def loc_ten_file():
-    return {"data": data_store.imported_files_data}
+    try:
+        return {
+            "data" :data_store.imported_files_data,
+            "status": status.HTTP_200_OK,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

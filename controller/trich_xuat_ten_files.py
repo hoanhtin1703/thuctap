@@ -15,8 +15,8 @@ def extract_info_from_filename(filename: str):
     # Trích xuất năm học
     year_match = re.search(r'(\d{4})[-\s]*(\d{4})', filename)
     if year_match:
-        start_year = year_match.group(1)[2:]
-        end_year = year_match.group(2)[2:]
+        start_year = year_match.group(1)
+        end_year = year_match.group(2)
         school_year = f"{start_year}-{end_year}"
     else:
         school_year = None

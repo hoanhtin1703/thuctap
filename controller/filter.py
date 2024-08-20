@@ -29,7 +29,7 @@ class Hoc_Phan:
             if 'Lớp học phần' in df.columns and 'GVHD' in df.columns:
                 filtered_df = df[['Lớp học phần',"GVHD"]].copy()
                 filtered_df['sku'] = filtered_df['Lớp học phần'].apply(url_friendly.clean_name)
-                print(filtered_df['sku'])
+
                 filtered_df.drop_duplicates(subset=['Lớp học phần'], keep='first', inplace=True)
                 filtered_df = filtered_df.reset_index(drop=True)
                 combined_df = pd.concat([combined_df, filtered_df], ignore_index=True)
@@ -37,7 +37,7 @@ class Hoc_Phan:
         combined_df.drop_duplicates(subset=['Lớp học phần'], keep='first', inplace=True)
         combined_df.reset_index(drop=True, inplace=True)
         filtered_by_hoc_phan = combined_df[combined_df['sku'].str.contains(re.escape(keyword))]
-        print(filtered_by_hoc_phan)
+
         return filtered_by_hoc_phan
 class DanhSachSinhVien(Hoc_Phan):
     def filter_danh_sach_sinh_vien(self, keyword=None):
@@ -60,8 +60,6 @@ class DanhSachSinhVien(Hoc_Phan):
                 filtered_df = df[df['sku'] == lop_hoc_phan_clean]
                 filtered_df.drop_duplicates(inplace=True)
                 filtered_df.reset_index(drop=True, inplace=True)
-                
-                print(filtered_df)
                 # filtered_df = df[df['sku'].str.contains(re.escape(lop_hoc_phan_clean))]
                 if not filtered_df.empty:  # Kiểm tra nếu DataFrame không rỗng
                     combined_df = pd.concat([combined_df, filtered_df])
@@ -70,6 +68,7 @@ class DanhSachSinhVien(Hoc_Phan):
         combined_df['Tổng số sinh viên'] = np.nan
         combined_df.drop_duplicates(inplace=True)
         combined_df.reset_index(drop=True, inplace=True)
+        combined_df.to_excel("data.xlsx")
         for lop_hoc_phan in combined_df['Lớp học phần'].unique():
             # Tính tổng số sinh viên cho từng lớp học phần
             idx = combined_df[combined_df['Lớp học phần'] == lop_hoc_phan].index[0]
@@ -82,5 +81,5 @@ class DanhSachSinhVien(Hoc_Phan):
             total_students_by_khoa.columns = ['Khóa', 'Tổng số sinh viên']
             total_students_khoa = '; '.join(total_students_by_khoa.apply(lambda x: f"{x['Khóa']} - {x['Tổng số sinh viên']}", axis=1))
             combined_df.at[idx + 1, 'Tổng số sinh viên'] = total_students_khoa
-        
+   
         return combined_df

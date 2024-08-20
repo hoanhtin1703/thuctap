@@ -32,8 +32,17 @@ def save_imported_files():
         print(f"Error saving imported files data: {e}")
 
 def add_imported_file(file_data: dict):
-    """Thêm tệp mới vào danh sách imported_files_data và lưu lại."""
-    imported_files_data.append(file_data)
+    """Thêm hoặc cập nhật tệp mới vào danh sách imported_files_data và lưu lại."""
+    # Kiểm tra nếu file_data đã tồn tại
+    existing_file = next((item for item in imported_files_data if item['Url_hoc_phan'] == file_data['Url_hoc_phan']), None)
+    
+    if existing_file:
+        # Nếu tồn tại, cập nhật thông tin
+        existing_file.update(file_data)
+    else:
+        # Nếu không tồn tại, thêm mới
+        imported_files_data.append(file_data)
+    
     save_imported_files()
 
 def get_imported_files() -> list:
